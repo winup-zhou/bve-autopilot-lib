@@ -1,0 +1,70 @@
+name: MSBuild
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - master
+      - develop
+    paths:
+      - '*/**'
+      - '!./*'
+      - './*.sln'
+      - '!.github/**'
+
+jobs:
+  build:
+    name: MSBuild
+    runs-on: windows-latest
+    env:
+      TARGET_REPO: winup-zhou/MetroAts
+      TARGET_WORKFLOW_FILE: build.yml
+      GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Get latest workflow run id of winup-zhou/MetroAts
+      run: |
+          RUN_ID=$(gh run list -w ${{ env.TARGET_WORKFLOW_FILE }} --repo "${{ env.TARGET_REPO }}" -L 1 --json databaseId | jq -r '.[0].databaseId')
+          echo "LATEST_RUN_ID=$RUN_ID" >> "$GITHUB_ENV"
+      shell: bash
+      
+    - name: Download a build artifact
+      uses: actions/download-artifact@v4
+      with:
+        run-id: ${{ env.LATEST_RUN_ID }}
+        path: MetroAts
+        repository: ${{ env.TARGET_REPO }}
+        github-token: ${{ secrets.ACCESS_TOKEN }}
+      
+    - name: Setup MSBuild.exe
+      uses: microsoft/setup-msbuild@v1.3.1
+
+    - name: Setup Nuget
+      uses: NuGet/setup-nuget@v1.2.0
+
+    - name: Restore nuget packages
+      run: nuget restore bve-autopilot.sln
+
+    - name: MSBuild
+      run: |
+          chcp 65001
+          msbuild bve-autopilot.sln /m /p:configuration="Release" /p:platform="Any CPU" /p:OutputPath="./out/"
+      shell: cmd
+
+    - name: Collect artifact
+      run: |
+        ls -alR
+        mkdir plugins/
+        find . -type f -name 'bve-autopilot-lib.dll' | xargs mv --force --backup=numbered -t ./plugins/
+        find . -type f -name 'MetroAtsBridge.dll' | xargs mv --force --backup=numbered -t ./plugins/
+        rm plugins/*~
+      shell: bash
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: plugins
+        path: ./plugins/
