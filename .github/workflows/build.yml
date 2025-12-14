@@ -46,7 +46,7 @@ jobs:
       uses: NuGet/setup-nuget@v1.2.0
 
     - name: Restore nuget packages
-      run: nuget restore MetroAts.sln
+      run: nuget restore bve-autopilot.sln
 
     - name: MSBuild
       run: msbuild bve-autopilot.sln /m /p:configuration="Release" /p:platform="Any CPU" /p:OutputPath="./out/"
