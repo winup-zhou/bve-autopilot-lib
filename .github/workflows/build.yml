@@ -1,7 +1,6 @@
 name: MSBuild
 
 on:
-  workflow_dispatch:
   pull_request:
   push:
     branches:
@@ -60,11 +59,12 @@ jobs:
         mkdir plugins/
         find . -type f -name 'bve-autopilot-lib.dll' | xargs mv --force --backup=numbered -t ./plugins/
         find . -type f -name 'MetroAtsBridge.dll' | xargs mv --force --backup=numbered -t ./plugins/
+        find . -type f -name 'LICENSE' | xargs mv --force --backup=numbered -t ./plugins/
         rm plugins/*~
       shell: bash
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: plugins
+        name: bve-autopilot-S-EX
         path: ./plugins/
