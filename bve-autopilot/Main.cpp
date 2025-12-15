@@ -127,8 +127,6 @@ namespace autopilot
     void Main::設定ファイル読込(LPCWSTR 設定ファイル名) {
         _状態.設定ファイル読込(設定ファイル名);
 
-        const auto &順序 = _状態.設定().稼働状態切替順序();
-
         _tasc有効 = false;
         _ato有効 = false;
         _ato.atc事前減速を設定(_状態.設定().atc事前減速());
