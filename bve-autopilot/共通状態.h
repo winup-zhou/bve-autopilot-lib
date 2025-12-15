@@ -33,28 +33,6 @@
 
 namespace autopilot {
 
-    enum class 互換モード型
-    {
-        無効,
-        汎用ats,
-        メトロ総合,
-        swp2,
-        小田急d_ats_p,
-        小田急cs_atc,
-        メトロtasc,
-    };
-
-    constexpr bool cs_atc互換モードである(互換モード型 互換モード) noexcept {
-        switch (互換モード) {
-        case autopilot::互換モード型::メトロ総合:
-        case autopilot::互換モード型::小田急cs_atc:
-        case autopilot::互換モード型::メトロtasc:
-            return true;
-        default:
-            return false;
-        }
-    }
-
     class 共通状態
     {
     public:
@@ -79,7 +57,6 @@ namespace autopilot {
 
         環境設定 &設定() noexcept { return _設定; }
         const 環境設定 &設定() const noexcept { return _設定; }
-        互換モード型 互換モード() const noexcept { return _互換モード; }
         const ATS_VEHICLESPEC & 車両仕様() const noexcept { return _車両仕様; }
         力行ノッチ 最大力行ノッチ() const noexcept {
             return _力行特性.最大力行ノッチ();
@@ -108,6 +85,7 @@ namespace autopilot {
             return _状態.BcPressure;
         }
         mps2 目安減速度() const noexcept { return _目安減速度; }
+        void 目安減速度設定(double dec);
         bool 戸閉() const noexcept { return _戸閉; }
         bool 自動発進可能な時刻である() const;
         int 入力逆転器ノッチ() const noexcept { return _入力逆転器ノッチ; }
@@ -136,7 +114,6 @@ namespace autopilot {
 
     private:
         環境設定 _設定;
-        互換モード型 _互換モード = 互換モード型::無効;
         ATS_VEHICLESPEC _車両仕様 = {};
         ATS_VEHICLESTATE _状態 = {};
         mps2 _目安減速度 = {};

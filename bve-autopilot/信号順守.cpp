@@ -421,46 +421,11 @@ namespace autopilot
     {
         switch (地上子.Type)
         {
-        case 3: // 信号現示受信 (各種 ATS-P プラグイン互換)
-            if (状態.互換モード() == 互換モード型::swp2) {
-                信号現示受信(地上子, 直前位置, 状態, false);
-            }
-            break;
         case 12: // ORP 起動 (メトロ総合プラグイン互換)
-            if (cs_atc互換モードである(状態.互換モード())) {
+            if (is_atc()) {
                 if (_現在閉塞.信号指示 == orp::orp信号インデックス) {
                     _現在閉塞.orp.設定(地上子.Optional, 直前位置);
                 }
-            }
-            break;
-        case 22: // 信号現示受信（小田急PI互換）
-            if (状態.互換モード() == 互換モード型::小田急d_ats_p) {
-                ATS_BEACONDATA Option;
-                Option = 地上子; //代入する
-                switch (地上子.Optional)
-                {
-                case 4:
-                    Option.Optional = 7654320;
-                    break;
-                case 5:
-                    Option.Optional = 76543210;
-                    break;
-                case -4:
-                    Option.Optional = 7654210;
-                    break;
-                case 3:
-                    Option.Optional = 765420;
-                    break;
-                default:
-                    Option.Optional = 0;
-                    break;
-                }
-                信号現示受信(Option, 直前位置, 状態, true);
-            }
-            break;
-        case 31: // 信号現示受信 (メトロ総合プラグイン互換)
-            if (cs_atc互換モードである(状態.互換モード())) {
-                信号現示受信(地上子, 直前位置, 状態, false);
             }
             break;
         case 1016: // 停止信号前速度設定
@@ -532,7 +497,7 @@ namespace autopilot
             }
         }
 
-        if (cs_atc互換モードである(状態.互換モード())) {
+        if (is_atc()) {
             // ORP の出力ノッチを取り込む
             ノッチ = std::min(ノッチ, _現在閉塞.orp.出力ノッチ());
             ノッチ = std::accumulate(
@@ -553,8 +518,7 @@ namespace autopilot
 
     bool 信号順守::orp照査中(const 共通状態 &状態) const noexcept
     {
-        return cs_atc互換モードである(状態.互換モード()) &&
-            _現在閉塞.orp.制御中();
+        return _現在閉塞.orp.制御中();
     }
 
     mps 信号順守::orp照査速度(const 共通状態 &状態) const noexcept
@@ -589,6 +553,13 @@ namespace autopilot
         }
     }
 
+    void 信号順守::ATC次闭塞信号現示変化(m 直前位置, double 距離, int 指示, const 共通状態& 状態) {
+        ATS_BEACONDATA 地上子{};
+               地上子.Distance = 距離;  
+               地上子.Signal = 指示;
+        信号現示受信(地上子, 直前位置, 状態, false);
+    }
+
     信号順守::閉塞型 *信号順守::信号現示受信(
         const ATS_BEACONDATA &地上子, m 直前位置,
         const 共通状態 &状態, bool 信号インデックスを更新する)
@@ -611,7 +582,7 @@ namespace autopilot
         auto 閉塞 = 対応する閉塞(受信した閉塞始点のある範囲, _前方閉塞一覧);
         閉塞->状態更新(地上子, _信号速度表, 信号インデックスを更新する);
 
-        if (cs_atc互換モードである(状態.互換モード())) {
+        if (is_atc()) {
             const auto &直前閉塞 =
                 閉塞 == _前方閉塞一覧.begin() ? _現在閉塞 : *std::prev(閉塞);
             閉塞->orp状態更新(直前閉塞.信号速度);

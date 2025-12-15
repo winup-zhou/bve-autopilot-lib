@@ -45,18 +45,6 @@ namespace autopilot
                 全て押している(新キー組合せ, 目標キー組合せ);
         }
 
-        constexpr 音声 切替時音声(稼働状態 新状態) noexcept {
-            switch (新状態) {
-            case 稼働状態::切:
-                return 音声::tasc無効設定音;
-            case 稼働状態::tascのみ有効:
-                return 音声::ato無効設定音;
-            case 稼働状態::ato有効:
-            default:
-                return 音声::ato有効設定音;
-            }
-        }
-
         制動指令 出力制動指令(
             手動制動自然数ノッチ 手動ノッチ, 自動制動自然数ノッチ 自動ノッチ,
             const 制動特性 &制動)
@@ -109,7 +97,6 @@ namespace autopilot
         _ato{},
         _tasc有効{true},
         _ato有効{true},
-        _稼働状態{_状態.設定().稼働状態切替順序().begin()},
         _インチング状態{インチング状態::切},
         _通過済地上子{},
         _音声状態{}
@@ -141,11 +128,6 @@ namespace autopilot
         _状態.設定ファイル読込(設定ファイル名);
 
         const auto &順序 = _状態.設定().稼働状態切替順序();
-        _稼働状態 = std::find(
-            順序.begin(), 順序.end(), _状態.設定().初期稼働状態());
-        if (_稼働状態 == 順序.end()) {
-            _稼働状態 = 順序.begin();
-        }
 
         _tasc有効 = false;
         _ato有効 = false;
@@ -184,18 +166,6 @@ namespace autopilot
             }
 
             switch (i.first) {
-            case キー操作::モード切替:
-                モード切替(true, true);
-                break;
-            case キー操作::モード切替逆:
-                モード切替(false, true);
-                break;
-            case キー操作::モード切替次:
-                モード切替(true, false);
-                break;
-            case キー操作::モード切替前:
-                モード切替(false, false);
-                break;
             case キー操作::ato発進:
                 if (_ato有効) {
                     _ato.発進(_状態, _tasc, ato::発進方式::手動);
@@ -224,6 +194,19 @@ namespace autopilot
         _tascato_mode = mode;
     }
 
+    void Main::setATCLimit(double distance, int signalindex) {
+		//_ato.atc事前減速を設定(true);
+		_ato.ATC次闭塞信号現示変化(_状態.現在位置(), distance, signalindex, _状態);
+    }
+
+    void Main::setSignalLimit(double distance, double speed) {
+		_ato.信号制限区間追加(_状態.現在位置(), distance, speed, _状態);
+    }
+
+    void Main::setSignalMaxDecel(double decel) {
+        _状態.目安減速度設定(std::fabs(decel));
+    }
+
     ATS_HANDLES Main::経過(
         const ATS_VEHICLESTATE &状態, int *出力値, int *音声状態)
     {
@@ -235,12 +218,6 @@ namespace autopilot
         if (_ato有効 && _状態.自動発進可能な時刻である()) {
             _ato.発進(_状態, _tasc, ato::発進方式::自動);
         }
-        /*
-        //ATO PI依存発進
-        if (出力値[103] == 1 && 出力値[73] == 1 && 出力値[92] != 7 && 出力値[137] == 0) {
-            _ato.発進(_状態, _tasc, ato::発進方式::手動);
-            _音声状態[音声::ato発進音].次に出力(ATS_SOUND_PLAY);
-        }*/
 
         // TASC インチング状態更新
         if (_インチング状態 == インチング状態::発進 && !_状態.停車中()) {
@@ -255,34 +232,11 @@ namespace autopilot
 
         // TASC と ATO の出力ノッチをまとめる
         自動制御指令 自動ノッチ = _状態.最大力行ノッチ();
-        //if (tasc有効()) {
+
         _ato有効 = _tascato_mode > 1;
         _tasc有効 = _tascato_mode > 0;
         if (_tascato_mode > 0)自動ノッチ = std::min(自動ノッチ, _tasc.出力ノッチ());
         if (_tascato_mode > 1)自動ノッチ = std::min(自動ノッチ, _ato.出力ノッチ());
-        //if (_tascato_mode = 1) {//TASCCgS有効、ATO/TASC切換NFBオン、キーは小田急でない
-        //    
-        //    
-        //    //tasc状態2 = 1;
-        //    //tasc有効();
-        //    //!ato有効();
-        //}
-        ////if (ato有効()) {
-        //else if (_tascato_mode = 2) {//TASCCgS有効、ATO/TASC切換NFBオフ、キーは小田急でない
-        //    自動ノッチ = std::min(自動ノッチ, _tasc.出力ノッチ());
-        //    
-        //    //_稼働状態 = tasc()._tasc();
-        //    //tasc有効();
-        //    _ato有効 = true;
-        //    _tasc有効 = true;
-        //    //tasc状態2 = 2;
-        //    //ato有効();
-        //}
-        //else if(_tascato_mode = 0) {//小田急キーorCgS無効or保安装置切
-        //    _ato有効 = false;
-        //    _tasc有効 = false;
-        //    //tasc状態2 = 3;
-        //}
 
         if (!ato有効() && !インチング中() ||
         //if ((出力値[73] == 0 || 出力値[92] == 7 || 出力値[137] == 1) && !インチング中() ||
@@ -329,39 +283,6 @@ namespace autopilot
         }
 
         return ハンドル位置;
-    }
-
-
-    void Main::モード切替(bool 順方向, bool ループ)
-    {/*
-        if (_状態.入力逆転器ノッチ() != 0) {
-            return;
-        }
-        if (!_状態.制動().非常ブレーキである(_状態.入力制動ノッチ())) {
-            return;
-        }
-
-        if (順方向) {
-            auto 新状態 = std::next(_稼働状態);
-            if (新状態 == _状態.設定().稼働状態切替順序().end()) {
-                if (!ループ) {
-                    return;
-                }
-                新状態 = _状態.設定().稼働状態切替順序().begin();
-            }
-            _稼働状態 = 新状態;
-        }
-        else {
-            if (_稼働状態 == _状態.設定().稼働状態切替順序().begin()) {
-                if (!ループ) {
-                    return;
-                }
-                _稼働状態 = _状態.設定().稼働状態切替順序().end();
-            }
-            --_稼働状態;
-        }
-
-        _音声状態[切替時音声(*_稼働状態)].次に出力(ATS_SOUND_PLAY);*/
     }
 
     void Main::地上子通過執行(m 直前位置)

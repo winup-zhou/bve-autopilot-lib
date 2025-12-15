@@ -83,5 +83,9 @@ namespace MetroAtsBridge
         private void SetSignal(object sender, SignalUpdatedEventArgs e) {
             if (isAutopilotPluginLoaded) Sync.SetSignal(e.SignalIndex);
         }
+
+        private void OnScenarioCreated(ScenarioCreatedEventArgs e) {
+            sectionManager = e.Scenario.SectionManager;
+        }
     }
 }

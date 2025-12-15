@@ -117,6 +117,7 @@ namespace autopilot
         mps orp照査速度(const 共通状態 &状態) const noexcept;
         mps 現在制限速度(const 共通状態 &状態) const;
         mps 現在常用パターン速度(const 共通状態 &状態) const;
+        void ATC次闭塞信号現示変化(m 直前位置, double 距離, int 指示, const 共通状態& 状態);
 
     private:
         std::map<信号インデックス, mps> _信号速度表;

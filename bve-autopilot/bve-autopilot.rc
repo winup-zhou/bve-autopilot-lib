@@ -15,7 +15,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// 日本語 (日本) resources
+// 日语(日本) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)
 LANGUAGE LANG_JAPANESE, SUBLANG_DEFAULT
@@ -52,8 +52,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,19,1,0
- PRODUCTVERSION 1,19,1,0
+ FILEVERSION 1,19,2,0
+ PRODUCTVERSION 1,19,2,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -68,14 +68,14 @@ BEGIN
     BEGIN
         BLOCK "041104b0"
         BEGIN
-            VALUE "CompanyName", "magicant/Line-16"
-            VALUE "FileDescription", "BVE autopilot plug-in"
-            VALUE "FileVersion", "1.19.1.0"
-            VALUE "InternalName", "bve-autopilot.dll"
-            VALUE "LegalCopyright", "Copyright (C) 2019-2024 magicant/Line-16"
-            VALUE "OriginalFilename", "bve-autopilot.dll"
-            VALUE "ProductName", "bve-autopilot"
-            VALUE "ProductVersion", "1.19.1.0"
+            VALUE "CompanyName", "magicant/Line-16/Win_Update"
+            VALUE "FileDescription", "BVE autopilot library for MetroAts"
+            VALUE "FileVersion", "1.19.2.0"
+            VALUE "InternalName", "bve-autopilot-lib.dll"
+            VALUE "LegalCopyright", "Copyright (C) 2019-2024 magicant/Line-16/Win_Update"
+            VALUE "OriginalFilename", "bve-autopilot-lib.dll"
+            VALUE "ProductName", "bve-autopilot-lib"
+            VALUE "ProductVersion", "1.19.2.0"
         END
     END
     BLOCK "VarFileInfo"
@@ -84,7 +84,7 @@ BEGIN
     END
 END
 
-#endif    // 日本語 (日本) resources
+#endif    // 日语(日本) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

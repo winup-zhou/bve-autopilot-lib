@@ -36,10 +36,6 @@ namespace autopilot
 
     enum class キー操作
     {
-        モード切替,
-        モード切替逆,
-        モード切替次,
-        モード切替前,
         ato発進,
         tascインチング,
     };
@@ -62,9 +58,6 @@ namespace autopilot
 
     enum class 音声
     {
-        tasc無効設定音,
-        ato無効設定音,
-        ato有効設定音,
         ato発進音,
         インチング開始音,
     };
@@ -149,7 +142,7 @@ namespace autopilot
         制動力割合 _転動防止制動割合;
         std::vector<制動力割合> _pressure_rates;
         リセット条件 _tasc制御リセット条件, _tasc緩解条件;
-        bool _atc事前減速, _ato一時停止あり;
+        bool _atc事前減速 = true, _ato一時停止あり;
 
         std::unordered_map<キー操作, キー組合せ> _キー割り当て;
         std::unordered_map<int, パネル出力対象> _パネル出力対象登録簿;

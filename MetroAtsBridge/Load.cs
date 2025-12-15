@@ -35,6 +35,7 @@ namespace MetroAtsBridge
         private static bool TASCenable = false;
         private static CorePlugin corePlugin;
         private static bool isAutopilotPluginLoaded = false;
+        public static SectionManager sectionManager;
 
         public MetroAtsBridge(PluginBuilder services) : base(services) {
             Config.Load();
@@ -53,6 +54,7 @@ namespace MetroAtsBridge
 
             BveHacker.MainFormSource.KeyDown += OnKeyDown;
             BveHacker.MainFormSource.KeyUp += OnKeyUp;
+            BveHacker.ScenarioCreated += OnScenarioCreated;
 
             try {
                 Sync.Load();
@@ -90,6 +92,7 @@ namespace MetroAtsBridge
             Native.HornBlown -= HornBlow;
             Native.SignalUpdated -= SetSignal;
             Plugins.AllPluginsLoaded -= OnAllPluginsLoaded;
+            BveHacker.ScenarioCreated -= OnScenarioCreated;
 
             BveHacker.MainFormSource.KeyDown -= OnKeyDown;
             BveHacker.MainFormSource.KeyUp -= OnKeyUp;

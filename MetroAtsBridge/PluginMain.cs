@@ -27,11 +27,24 @@ namespace MetroAtsBridge
                 Sync.SetReverser((int)AtsHandles.ReverserPosition);
             }
 
+            int pointer = 0;
+            while (sectionManager.Sections[pointer].Location < state.Location) {
+                pointer++;
+                if (pointer >= sectionManager.Sections.Count) {
+                    pointer = sectionManager.Sections.Count - 1;
+                    break;
+                }
+            }
+
+            var nextSection = sectionManager.Sections[pointer] as Section;
 
             if (!StandAloneMode) {
                 if (corePlugin.isATO_TASCenabled && corePlugin.KeyPos != MetroAts.KeyPosList.None) {
                     if (Config.ATO_KeyPosLists.Contains((KeyPosList)corePlugin.KeyPos) && panel[263] == 1 && panel[274] == 0) {
-                        if (isAutopilotPluginLoaded) Sync.setATOTASCStatus(2);
+                        if (isAutopilotPluginLoaded) { 
+                            Sync.setATOTASCStatus(2);
+                            Sync.ATO_setATCLimit(nextSection.Location - state.Location, nextSection.CurrentSignalIndex);
+                        }
                     } else {
                         if (Config.TASC_KeyPosLists.Contains((KeyPosList)corePlugin.KeyPos)) {
                             if (isAutopilotPluginLoaded) Sync.setATOTASCStatus(1);
@@ -47,7 +60,10 @@ namespace MetroAtsBridge
             } else {
                 if (TASCenable && Keyin) {
                     if (Config.ATO_KeyPosLists.Contains(Config.StandAloneKey) && panel[263] == 1 && panel[274] == 0) {
-                        if (isAutopilotPluginLoaded) Sync.setATOTASCStatus(2);
+                        if (isAutopilotPluginLoaded) {
+                            Sync.setATOTASCStatus(2);
+                            Sync.ATO_setATCLimit(nextSection.Location - state.Location, nextSection.CurrentSignalIndex);
+                        }
                     } else {
                         if (Config.TASC_KeyPosLists.Contains(Config.StandAloneKey)) {
                             if (isAutopilotPluginLoaded) Sync.setATOTASCStatus(1);

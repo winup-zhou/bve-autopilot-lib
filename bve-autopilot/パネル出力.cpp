@@ -92,30 +92,6 @@ namespace autopilot
                 return static_cast<int>(
                     main.tasc状態().出力ノッチ().制動成分().value);
             })},
-                //add
-            {L"tascbrake2", パネル出力対象([](const Main& main) {
-                if (!main.tasc有効() || main.ato有効() || main.ato一時停止中() || main.状態().現在速度() == 0.0_mps || main.tasc状態().出力ノッチ().制動成分().value == 0) {
-                    return 10;
-                }
-                return static_cast<int>(
-                    (main.tasc状態().出力ノッチ().制動成分().value) / 10);
-            })},
-            {L"tascbrake1", パネル出力対象([](const Main& main) {
-                if (!main.tasc有効() || main.ato有効() || main.ato一時停止中() || main.状態().現在速度() == 0.0_mps || main.tasc状態().出力ノッチ().制動成分().value == 0) {
-                    return 10;
-                }
-                return static_cast<int>(
-                    (main.tasc状態().出力ノッチ().制動成分().value) % 10);
-            })},
-            {L"tascstatusE", パネル出力対象([](const Main& main) {
-                if (!main.tasc有効() || main.ato有効() || main.ato一時停止中() || main.状態().現在速度() == 0.0_mps || main.tasc状態().出力ノッチ().制動成分().value == 0) {
-                    return 0;
-                }
-                else {
-                    return 1;
-                }
-            })},
-                //endadd
             {L"tascdistance", パネル出力対象([](const Main &main) {
                 cm 残距離 =
                     main.tasc状態().目標停止位置() - main.状態().現在位置();
@@ -255,11 +231,7 @@ namespace autopilot
                     出力 = -20.0 * 100;
                 }
                 return static_cast<int>(std::round(出力));
-            })},
-            {L"compatmode", パネル出力対象([](const Main &main) {
-                互換モード型 モード = main.状態().互換モード();
-                return static_cast<int>(モード);
-            })},
+            })}
         };
 
         const パネル出力対象 無対象{ [](const Main &) { return 0; } };

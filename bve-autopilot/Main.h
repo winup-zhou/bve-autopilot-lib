@@ -38,15 +38,6 @@ namespace autopilot
         const 共通状態 &状態() const noexcept { return _状態; }
         const tasc &tasc状態() const noexcept { return _tasc; }
         const ato &ato状態() const noexcept { return _ato; }
-        稼働状態 現在稼働状態() const noexcept { return *_稼働状態; }
-        /*
-        bool tasc有効() const noexcept {
-            return autopilot::tasc有効(現在稼働状態());
-        }
-        bool ato有効() const noexcept {
-            return autopilot::ato有効(現在稼働状態());
-        }
-        */
         bool tasc有効() const noexcept { return _tasc有効; }
         bool ato有効() const noexcept { return _ato有効; }
         bool インチング中() const noexcept {
@@ -95,6 +86,9 @@ namespace autopilot
             const ATS_VEHICLESTATE &状態, int *出力値, int *音声状態);
 
         void SetATOTASCStatus(int mode);
+        void setATCLimit(double distance, int signalindex);
+        void setSignalLimit(double distance, double speed);
+        void setSignalMaxDecel(double decel);
 
     private:
         enum class インチング状態
@@ -109,12 +103,10 @@ namespace autopilot
         ato _ato;
         bool _tasc有効, _ato有効;
         int _tascato_mode = 0;
-        std::vector<稼働状態>::const_iterator _稼働状態;
         インチング状態 _インチング状態;
         std::vector<ATS_BEACONDATA> _通過済地上子;
         std::unordered_map<音声, 音声出力> _音声状態;
 
-        void モード切替(bool 順方向, bool ループ);
         void 地上子通過執行(m 直前位置);
     };
 

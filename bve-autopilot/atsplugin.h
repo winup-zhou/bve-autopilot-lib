@@ -144,3 +144,12 @@ ATS_API void WINAPI SetBeaconData(ATS_BEACONDATA);
 
 // Called from MetroAtsBridge when ATO/TASC should enable
 ATS_API void WINAPI setATOTASCStatus(int mode);
+
+// Called from MetroAtsBridge when ATC limit changed
+ATS_API void WINAPI ATO_setATCLimit(double distance, int signalindex);
+
+// Called from MetroAtsBridge when Signal pattern is generated
+ATS_API void WINAPI ATO_setSignalLimit(double distance, double speed);
+
+// Called from MetroAtsBridge when max Decel. is set by signals
+ATS_API void WINAPI ATOTASC_setSignalMaxDecel(double dec);

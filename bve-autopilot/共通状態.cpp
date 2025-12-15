@@ -43,7 +43,6 @@ namespace autopilot {
     void 共通状態::リセット() noexcept
     {
         // _設定.リセット(); // ファイルから読み込むのでリセットしない
-        _互換モード = 互換モード型::無効;
         _状態 = ATS_VEHICLESTATE{};
         _目安減速度 = 0.8 * _設定.常用最大減速度();
         _自動発進待ち時間 = s::quiet_NaN();
@@ -69,13 +68,14 @@ namespace autopilot {
         _勾配グラフ.列車長を設定(列車長());
     }
 
+    void 共通状態::目安減速度設定(double dec) {
+        _目安減速度 = std::min(static_cast<mps2>(static_cast<kmphps>(1.0 * dec)), _目安減速度);
+    }
+
     void 共通状態::地上子通過(const ATS_BEACONDATA &地上子, m 直前位置)
     {
         switch (地上子.Type)
         {
-        case 1001: // 互換モード設定
-            _互換モード = static_cast<互換モード型>(地上子.Optional);
-            break;
         case 1002: // 目標減速度設定
             if (地上子.Optional > 0) {
                 _目安減速度 = std::min(

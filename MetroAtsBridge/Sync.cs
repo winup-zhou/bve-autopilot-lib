@@ -41,5 +41,11 @@ namespace MetroAtsBridge
         public static extern void SetBeaconData(AtsBeaconData b);
         [DllImport("bve-autopilot-lib.dll", CallingConvention = CalCnv)]
         public static extern void setATOTASCStatus(int mode);
+        [DllImport("bve-autopilot-lib.dll", CallingConvention = CalCnv)]
+        public static extern void ATO_setATCLimit(double distance, int signalindex);
+        [DllImport("bve-autopilot-lib.dll", CallingConvention = CalCnv)]
+        public static extern void ATO_setSignalLimit(double distance, double speed);
+        [DllImport("bve-autopilot-lib.dll", CallingConvention = CalCnv)]
+        public static extern void ATOTASC_setSignalMaxDecel(double dec);
     }
 }

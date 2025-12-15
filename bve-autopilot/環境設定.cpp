@@ -246,7 +246,6 @@ namespace autopilot
         _atc事前減速(true),
         _ato一時停止あり(false),
         _キー割り当て{
-            {キー操作::モード切替, デフォルトキー組合せ()},
             {キー操作::ato発進, デフォルトキー組合せ()},
             {キー操作::tascインチング, デフォルトキー組合せ()}, },
         _パネル出力対象登録簿(),
@@ -270,26 +269,6 @@ namespace autopilot
         constexpr std::size_t buffer_size = 1024;
         WCHAR buffer[buffer_size];
         DWORD size;
-
-        // 初期モード
-        size = GetPrivateProfileStringW(
-            L"init", L"mode", L"", buffer, buffer_size,
-            設定ファイル名);
-        if (0 < size && size < buffer_size - 1) {
-            _初期稼働状態 = 稼働状態を解析(buffer);
-        }
-
-        // モード切替順序
-        size = GetPrivateProfileStringW(
-            L"control", L"modes", L"", buffer, buffer_size,
-            設定ファイル名);
-        if (0 < size && size < buffer_size - 1) {
-            auto tokens = カンマ区切り文字列を分割(buffer);
-            auto 順序列 = 稼働状態列を解析(tokens);
-            if (!順序列.empty()) {
-                _稼働状態切替順序 = 順序列;
-            }
-        }
 
         // 車両長
         size = GetPrivateProfileStringW(
@@ -426,10 +405,7 @@ namespace autopilot
 
         // キー割り当て
         for (auto &i : std::initializer_list<std::pair<キー操作, LPCWSTR>>
-            { {キー操作::モード切替, L"mode"},
-              {キー操作::モード切替逆, L"modeback"},
-              {キー操作::モード切替次, L"modenext"},
-              {キー操作::モード切替前, L"modeprevious"},
+            { 
               {キー操作::ato発進, L"atostart"},
               {キー操作::tascインチング, L"inch"},})
         {
@@ -468,9 +444,7 @@ namespace autopilot
 
         // 音声出力対象
         for (auto &i : std::initializer_list<std::pair<音声, LPCWSTR>>
-            { {音声::tasc無効設定音, L"tascdisabled"},
-              {音声::ato無効設定音, L"atodisabled"},
-              {音声::ato有効設定音, L"atoenabled"},
+            { 
               {音声::ato発進音, L"atostart"},
               {音声::インチング開始音, L"inchingstart"} })
         {

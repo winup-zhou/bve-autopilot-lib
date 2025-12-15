@@ -182,3 +182,21 @@ ATS_API void WINAPI setATOTASCStatus(int mode) {
 		main->SetATOTASCStatus(mode);
 	}
 }
+
+ATS_API void WINAPI ATO_setATCLimit(double distance, int signalindex) {
+	if (main != nullptr) {
+		main->setATCLimit(distance, signalindex);
+	}
+}
+
+ATS_API void WINAPI ATO_setSignalLimit(double distance, double speed) {
+    if (main != nullptr) {
+        main->setSignalLimit(distance, speed);
+    }
+}
+
+ATS_API void WINAPI ATOTASC_setSignalMaxDecel(double dec) {
+	if (main != nullptr) {
+		main->setSignalMaxDecel(dec);
+	}
+}
