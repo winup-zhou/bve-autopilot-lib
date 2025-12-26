@@ -76,6 +76,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <TargetName>$(ProjectName)64</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -119,7 +120,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ModuleDefinitionFile>bve-autopilot.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>bve-autopilot64.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -236,6 +237,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="bve-autopilot.def" />
+    <None Include="bve-autopilot64.def" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="bve-autopilot.rc" />

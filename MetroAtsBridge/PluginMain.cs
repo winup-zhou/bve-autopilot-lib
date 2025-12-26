@@ -21,10 +21,16 @@ namespace MetroAtsBridge
             var AtsHandles = BveHacker.Scenario.Vehicle.Instruments.AtsPlugin.AtsHandles;
 
 
-            if (isAutopilotPluginLoaded) {                       
-                Sync.SetPower(AtsHandles.PowerNotch);
-                Sync.SetBrake(AtsHandles.BrakeNotch);
-                Sync.SetReverser((int)AtsHandles.ReverserPosition);
+            if (isAutopilotPluginLoaded) {
+                if (is64Bit) {
+                    Sync64.SetPower(AtsHandles.PowerNotch);
+                    Sync64.SetBrake(AtsHandles.BrakeNotch);
+                    Sync64.SetReverser((int)AtsHandles.ReverserPosition);
+                } else {
+                    Sync.SetPower(AtsHandles.PowerNotch);
+                    Sync.SetBrake(AtsHandles.BrakeNotch);
+                    Sync.SetReverser((int)AtsHandles.ReverserPosition);
+                }
             }
 
             int pointer = 0;
@@ -41,40 +47,65 @@ namespace MetroAtsBridge
             if (!StandAloneMode) {
                 if (corePlugin.isATO_TASCenabled && corePlugin.KeyPos != MetroAts.KeyPosList.None) {
                     if (Config.ATO_KeyPosLists.Contains((KeyPosList)corePlugin.KeyPos) && panel[263] == 1 && panel[274] == 0) {
-                        if (isAutopilotPluginLoaded) { 
-                            Sync.setATOTASCStatus(2);
-                            Sync.ATO_setATCLimit(nextSection.Location - state.Location, nextSection.CurrentSignalIndex);
+                        if (isAutopilotPluginLoaded) {
+                            if (is64Bit) {
+                                Sync64.setATOTASCStatus(2);
+                                Sync64.ATO_setATCLimit(nextSection.Location - state.Location, nextSection.CurrentSignalIndex);
+                            } else {
+                                Sync.setATOTASCStatus(2);
+                                Sync.ATO_setATCLimit(nextSection.Location - state.Location, nextSection.CurrentSignalIndex);
+                            }                               
                         }
                     } else {
                         if (Config.TASC_KeyPosLists.Contains((KeyPosList)corePlugin.KeyPos)) {
-                            if (isAutopilotPluginLoaded) Sync.setATOTASCStatus(1);
+                            if (isAutopilotPluginLoaded) {
+                                if (is64Bit) Sync64.setATOTASCStatus(1);
+                                else Sync.setATOTASCStatus(1);
+                            }
+                            
                         } else {
-                            if (isAutopilotPluginLoaded) 
-                                Sync.setATOTASCStatus(0);
+                            if (isAutopilotPluginLoaded) {
+                                if (is64Bit) Sync64.setATOTASCStatus(0);
+                                else Sync.setATOTASCStatus(0);
+                            }
                         }
                     }
                 } else {
-                    if (isAutopilotPluginLoaded)
-                        Sync.setATOTASCStatus(0);
+                    if (isAutopilotPluginLoaded) {
+                        if (is64Bit) Sync64.setATOTASCStatus(0);
+                        else Sync.setATOTASCStatus(0);
+                    }
                 }
             } else {
                 if (TASCenable && Keyin) {
                     if (Config.ATO_KeyPosLists.Contains(Config.StandAloneKey) && panel[263] == 1 && panel[274] == 0) {
                         if (isAutopilotPluginLoaded) {
-                            Sync.setATOTASCStatus(2);
-                            Sync.ATO_setATCLimit(nextSection.Location - state.Location, nextSection.CurrentSignalIndex);
+                            if (is64Bit) {
+                                Sync64.setATOTASCStatus(2);
+                                Sync64.ATO_setATCLimit(nextSection.Location - state.Location, nextSection.CurrentSignalIndex);
+                            } else {
+                                Sync.setATOTASCStatus(2);
+                                Sync.ATO_setATCLimit(nextSection.Location - state.Location, nextSection.CurrentSignalIndex);
+                            }
                         }
                     } else {
                         if (Config.TASC_KeyPosLists.Contains(Config.StandAloneKey)) {
-                            if (isAutopilotPluginLoaded) Sync.setATOTASCStatus(1);
+                            if (isAutopilotPluginLoaded) {
+                                if (is64Bit) Sync64.setATOTASCStatus(1);
+                                else Sync.setATOTASCStatus(1);
+                            }
                         } else {
-                            if (isAutopilotPluginLoaded)
-                                Sync.setATOTASCStatus(0);
+                            if (isAutopilotPluginLoaded) {
+                                if (is64Bit) Sync64.setATOTASCStatus(0);
+                                else Sync.setATOTASCStatus(0);
+                            }
                         }
                     }
                 } else {
-                    if (isAutopilotPluginLoaded)
-                        Sync.setATOTASCStatus(0);
+                    if (isAutopilotPluginLoaded) {
+                        if (is64Bit) Sync64.setATOTASCStatus(0);
+                        else Sync.setATOTASCStatus(0);
+                    }
                 }
             }
             int[] panel_ = new int[1024];
@@ -93,7 +124,7 @@ namespace MetroAtsBridge
                 IntPtr soundPtr = soundHandle.AddrOfPinnedObject();
 
                 if (isAutopilotPluginLoaded) {
-                    var rtnVal = Sync.Elapse(new Sync.AtsVehicleState {
+                    var rtnVal = Sync.Elapse(new AtsStruct.AtsVehicleState {
                         Location = state.Location,
                         Speed = state.Speed,
                         Time = Convert.ToInt32(state.Time.TotalMilliseconds),

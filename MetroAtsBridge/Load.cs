@@ -36,8 +36,10 @@ namespace MetroAtsBridge
         private static CorePlugin corePlugin;
         private static bool isAutopilotPluginLoaded = false;
         public static SectionManager sectionManager;
+        bool is64Bit = false;
 
         public MetroAtsBridge(PluginBuilder services) : base(services) {
+            is64Bit = Environment.Is64BitProcess;
             Config.Load();
 
             Native = Extensions.GetExtension<INative>();
@@ -56,14 +58,26 @@ namespace MetroAtsBridge
             BveHacker.MainFormSource.KeyUp += OnKeyUp;
             BveHacker.ScenarioCreated += OnScenarioCreated;
 
-            try {
-                Sync.Load();
-                isAutopilotPluginLoaded = true;
-            } catch (DllNotFoundException e) {
-                throw new BveFileLoadException("Unable to find bve-autopilot-lib.dll. Details: " + e.Message, "MetroAtsBridge");
-            } catch (Exception e) {
-                throw new BveFileLoadException(e.ToString(), "MetroAtsBridge");
+            if (is64Bit) {
+                try {
+                    Sync64.Load();
+                    isAutopilotPluginLoaded = true;
+                } catch (DllNotFoundException e) {
+                    throw new BveFileLoadException("Unable to find bve-autopilot-lib64.dll. Details: " + e.Message, "MetroAtsBridge");
+                } catch (Exception e) {
+                    throw new BveFileLoadException(e.ToString(), "MetroAtsBridge");
+                }
+            } else {
+                try {
+                    Sync.Load();
+                    isAutopilotPluginLoaded = true;
+                } catch (DllNotFoundException e) {
+                    throw new BveFileLoadException("Unable to find bve-autopilot-lib.dll. Details: " + e.Message, "MetroAtsBridge");
+                } catch (Exception e) {
+                    throw new BveFileLoadException(e.ToString(), "MetroAtsBridge");
+                }
             }
+
         }
 
         private void OnAllPluginsLoaded(object sender, EventArgs e) {
@@ -78,7 +92,10 @@ namespace MetroAtsBridge
         public override void Dispose() {
             Config.Dispose();
 
-            if (isAutopilotPluginLoaded) Sync.Dispose();
+            if (isAutopilotPluginLoaded) {
+                if (is64Bit) Sync64.Dispose();
+                else Sync.Dispose();
+            }
             isAutopilotPluginLoaded = false; 
             
             TASCenable = false;

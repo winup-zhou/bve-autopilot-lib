@@ -11,21 +11,31 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Diagnostics.Eventing.Reader;
 
 namespace MetroAtsBridge
 {
     public partial class MetroAtsBridge : AssemblyPluginBase {
 
         private void Initialize(object sender, StartedEventArgs e) {
-            if (isAutopilotPluginLoaded) Sync.Initialize((int)e.DefaultBrakePosition);
+            if (isAutopilotPluginLoaded) {
+                if (is64Bit) Sync64.Initialize((int)e.DefaultBrakePosition);
+                else Sync.Initialize((int)e.DefaultBrakePosition);
+            } 
         }
 
         private void DoorOpened(object sender, EventArgs e) {
-            if (isAutopilotPluginLoaded) Sync.DoorOpen();
+            if (isAutopilotPluginLoaded) { 
+                if (is64Bit) Sync64.DoorOpen();
+                else Sync.DoorOpen();
+            } 
         }
 
         private void DoorClosed(object sender, EventArgs e) {
-            if (isAutopilotPluginLoaded) Sync.DoorClose();
+            if (isAutopilotPluginLoaded) {
+                if (is64Bit) Sync64.DoorClose();
+                else Sync.DoorClose();
+            }
         }
 
         private void OnKeyUp(object sender, KeyEventArgs e) {
@@ -40,7 +50,10 @@ namespace MetroAtsBridge
         }
 
         private void KeyUp(object sender, AtsKeyEventArgs e) {
-            if (isAutopilotPluginLoaded) Sync.KeyUp((int)e.KeyName);
+            if (isAutopilotPluginLoaded) {
+                if (is64Bit) Sync64.KeyUp((int)e.KeyName);
+                else Sync.KeyUp((int)e.KeyName);
+            } 
         }
 
         private void KeyDown(object sender, AtsKeyEventArgs e) {
@@ -52,36 +65,62 @@ namespace MetroAtsBridge
                     Keyin = true;
                 }
             }
-            
-            if (isAutopilotPluginLoaded) Sync.KeyDown((int)e.KeyName);
+
+            if (isAutopilotPluginLoaded) {
+                if (is64Bit) Sync64.KeyDown((int)e.KeyName);
+                else Sync.KeyDown((int)e.KeyName);
+            }
         }
 
         private void SetBeaconData(object sender, BeaconPassedEventArgs e) {
-            if (isAutopilotPluginLoaded) Sync.SetBeaconData(new Sync.AtsBeaconData {
-                Type = e.Type,
-                Signal = e.SignalIndex,
-                Distance = e.Distance,
-                Optional = e.Optional,
-            });
+            if (isAutopilotPluginLoaded) {
+                if (is64Bit) Sync64.SetBeaconData(new AtsStruct.AtsBeaconData {
+                    Type = e.Type,
+                    Signal = e.SignalIndex,
+                    Distance = e.Distance,
+                    Optional = e.Optional,
+                });
+                else Sync.SetBeaconData(new AtsStruct.AtsBeaconData {
+                    Type = e.Type,
+                    Signal = e.SignalIndex,
+                    Distance = e.Distance,
+                    Optional = e.Optional,
+                });
+            }
         }
 
         private void SetVehicleSpec(object sender, EventArgs e) {
             vehicleSpec = Native.VehicleSpec;
-            if (isAutopilotPluginLoaded) Sync.SetVehicleSpec(new Sync.AtsVehicleSpec {
-                BrakeNotches = vehicleSpec.BrakeNotches,
-                PowerNotches = vehicleSpec.PowerNotches,
-                AtsNotch = vehicleSpec.AtsNotch,
-                B67Notch = vehicleSpec.B67Notch,
-                Cars = vehicleSpec.Cars
-            });
+            if (isAutopilotPluginLoaded) {
+                if (is64Bit) Sync64.SetVehicleSpec(new AtsStruct.AtsVehicleSpec {
+                    BrakeNotches = vehicleSpec.BrakeNotches,
+                    PowerNotches = vehicleSpec.PowerNotches,
+                    AtsNotch = vehicleSpec.AtsNotch,
+                    B67Notch = vehicleSpec.B67Notch,
+                    Cars = vehicleSpec.Cars
+                });
+                else Sync.SetVehicleSpec(new AtsStruct.AtsVehicleSpec {
+                    BrakeNotches = vehicleSpec.BrakeNotches,
+                    PowerNotches = vehicleSpec.PowerNotches,
+                    AtsNotch = vehicleSpec.AtsNotch,
+                    B67Notch = vehicleSpec.B67Notch,
+                    Cars = vehicleSpec.Cars
+                });
+            }
         }
 
         private void HornBlow(object sender, HornBlownEventArgs e) {
-            if (isAutopilotPluginLoaded) Sync.HornBlow((int)e.HornType);
+            if (isAutopilotPluginLoaded) {
+                if (is64Bit) Sync64.HornBlow((int)e.HornType);
+                else Sync.HornBlow((int)e.HornType);
+            }
         }
 
         private void SetSignal(object sender, SignalUpdatedEventArgs e) {
-            if (isAutopilotPluginLoaded) Sync.SetSignal(e.SignalIndex);
+            if (isAutopilotPluginLoaded) {
+                if (is64Bit) Sync64.SetSignal(e.SignalIndex);
+                else Sync.SetSignal(e.SignalIndex);
+            }
         }
 
         private void OnScenarioCreated(ScenarioCreatedEventArgs e) {

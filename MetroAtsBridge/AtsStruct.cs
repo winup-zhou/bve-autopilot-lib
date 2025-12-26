@@ -5,7 +5,7 @@ namespace MetroAtsBridge {
     /// <summary>
     /// Basics of ATS plug-in.
     /// </summary>
-    public static partial class Sync {
+    public static partial class AtsStruct {
         /// <summary>
         /// ATS Plug-in Version
         /// </summary>
