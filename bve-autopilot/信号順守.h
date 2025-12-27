@@ -108,7 +108,7 @@ namespace autopilot
 
         bool is_atc() const {
             return 10 <= _現在閉塞.信号指示 &&
-                _現在閉塞.信号指示 < std::numeric_limits<int>::max();
+                _現在閉塞.信号指示 < 100;
             // リセット前後に std::numeric_limits<int>::max() が
             // 信号インデックスとして送られてくることがあるが無視する
         }
