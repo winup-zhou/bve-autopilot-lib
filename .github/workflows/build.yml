@@ -62,7 +62,7 @@ jobs:
         find . -type f -name 'bve-autopilot-lib64.dll' -exec mv --force --backup=numbered -t ./plugins/ {} +
         find . -type f -name 'MetroAtsBridge.dll' -exec mv --force --backup=numbered -t ./plugins/ {} +
         find . -type f -name 'LICENSE' -exec mv --force --backup=numbered -t ./plugins/ {} +
-        rm plugins/*~
+        rm -f plugins/*~
       shell: bash
 
     - name: Upload artifact
