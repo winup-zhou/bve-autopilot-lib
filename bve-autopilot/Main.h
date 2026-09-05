@@ -89,6 +89,19 @@ namespace autopilot
         void setATCLimit(double distance, int signalindex);
         void setSignalLimit(double distance, double speed);
         void setSignalMaxDecel(double decel);
+        void setATCBlockTargetSpeed(int index, int kmh); // ATO 目標速度（index 単位）を直接設定
+
+        // ホスト（MetroAtsBridge）から、BVE 物理 panel/sound への書き込みを行うかどうかを設定する。
+        // false の場合、表示用の端子書き込みを止めるが、論理出力（GetPanelOutput*）は従来通り参照できる。
+        void SetOutputWriteEnabled(bool パネル, bool 音声) noexcept {
+            _出力書込パネル = パネル;
+            _出力書込音声 = 音声;
+        }
+
+        // ホスト（MetroAtsBridge）向け音声論理出力：atostart / inchingstart（[sound] の論理名と一致）
+        int 音声出力数() const noexcept { return 2; }
+        const wchar_t *音声出力名(int 索引) const noexcept;
+        int 音声出力値(int 索引) const noexcept;
 
     private:
         enum class インチング状態
@@ -103,6 +116,9 @@ namespace autopilot
         ato _ato;
         bool _tasc有効, _ato有効;
         int _tascato_mode = 0;
+        bool _出力書込パネル = true;
+        bool _出力書込音声 = true;
+        int _音声最終出力[2]; // 各音声（ato発進音=0, インチング開始音=1）の今フレーム最終出力（未設定=-1）
         インチング状態 _インチング状態;
         std::vector<ATS_BEACONDATA> _通過済地上子;
         std::unordered_map<音声, 音声出力> _音声状態;

@@ -58,6 +58,9 @@ namespace autopilot
         void ATC次闭塞信号現示変化(m 直前位置, double 距離, int 指示, const 共通状態& 状態) {
 			_信号.ATC次闭塞信号現示変化(直前位置, 距離, 指示, 状態);
         }
+        void 信号速度を直接設定(int 指示, mps 速度) noexcept {
+            _信号.信号速度を直接設定(指示, 速度);
+        }
         void 信号制限区間追加( m 直前位置, double 距離, int 制限, const 共通状態& 状態);
         void 信号現示変化(信号インデックス 指示) {
             _信号.信号現示変化(指示);

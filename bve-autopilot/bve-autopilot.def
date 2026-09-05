@@ -21,3 +21,11 @@ EXPORTS
 	ATO_setATCLimit
 	ATO_setSignalLimit
 	ATOTASC_setSignalMaxDecel
+	GetPanelOutputCount
+	GetPanelOutputName
+	GetPanelOutputValue
+	SetPanelSoundWriteEnabled
+	GetSoundOutputCount
+	GetSoundOutputName
+	GetSoundOutputValue
+	ATO_setBlockTargetSpeed

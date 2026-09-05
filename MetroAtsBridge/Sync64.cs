@@ -48,5 +48,21 @@ namespace MetroAtsBridge
         public static extern void ATO_setSignalLimit(double distance, double speed);
         [DllImport("bve-autopilot-lib64.dll", CallingConvention = CalCnv)]
         public static extern void ATOTASC_setSignalMaxDecel(double dec);
+        [DllImport("bve-autopilot-lib64.dll", CallingConvention = CalCnv)]
+        public static extern int GetPanelOutputCount();
+        [DllImport("bve-autopilot-lib64.dll", CallingConvention = CalCnv)]
+        public static extern IntPtr GetPanelOutputName(int index);
+        [DllImport("bve-autopilot-lib64.dll", CallingConvention = CalCnv)]
+        public static extern int GetPanelOutputValue(int index);
+        [DllImport("bve-autopilot-lib64.dll", CallingConvention = CalCnv)]
+        public static extern void SetPanelSoundWriteEnabled(int panelEnabled, int soundEnabled);
+        [DllImport("bve-autopilot-lib64.dll", CallingConvention = CalCnv)]
+        public static extern int GetSoundOutputCount();
+        [DllImport("bve-autopilot-lib64.dll", CallingConvention = CalCnv)]
+        public static extern IntPtr GetSoundOutputName(int index);
+        [DllImport("bve-autopilot-lib64.dll", CallingConvention = CalCnv)]
+        public static extern int GetSoundOutputValue(int index);
+        [DllImport("bve-autopilot-lib64.dll", CallingConvention = CalCnv)]
+        public static extern void ATO_setBlockTargetSpeed(int index, int kmh);
     }
 }

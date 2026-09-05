@@ -95,6 +95,7 @@ namespace autopilot
         void リセット();
         void 発進(発進方式 方式);
         void 信号現示変化(信号インデックス 指示);
+        void 信号速度を直接設定(int 指示, mps 速度); // ATO 目標速度（index 単位）の上書き（MetroAtsBridge 内部通信用）
         void tasc目標停止位置変化(区間 位置のある範囲);
         void atc事前減速を設定(bool 事前減速) noexcept {
             _atc事前減速 = 事前減速;

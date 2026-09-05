@@ -42,4 +42,10 @@ namespace autopilot
         std::function<int(const Main &)> _出力;
     };
 
+    // ホスト（MetroAtsBridge）向け：ini の端子設定とは無関係に、
+    // 全論理出力（パネル出力対象名簿）を番号で直接参照する内部通信用アクセサ。
+    int パネル出力対象数() noexcept;
+    const wchar_t *パネル出力対象名(int 索引) noexcept;
+    int パネル出力対象値(const Main &main, int 索引);
+
 }

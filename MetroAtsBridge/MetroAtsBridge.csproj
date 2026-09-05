@@ -53,6 +53,7 @@
     <Compile Include="Input.cs" />
     <Compile Include="Load.cs" />
     <Compile Include="PluginMain.cs" />
+    <Compile Include="PluginState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Sync.cs" />
     <Compile Include="Sync64.cs" />

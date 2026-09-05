@@ -23,6 +23,7 @@
 #include <string>
 #include <utility>
 #include "Main.h"
+#include "パネル出力.h"
 
 namespace {
 
@@ -115,6 +116,59 @@ ATS_API ATS_HANDLES WINAPI Elapse(
         return main->経過(state, panelValues, soundStates);
     }
     return ATS_HANDLES{};
+}
+
+// ホスト（MetroAtsBridge）との内部通信：autopilot の全論理パネル出力を番号で直接参照する。
+// 物理 panel 配列の中継を経由しない。
+ATS_API int WINAPI GetPanelOutputCount() {
+    return autopilot::パネル出力対象数();
+}
+
+ATS_API const wchar_t * WINAPI GetPanelOutputName(int index) {
+    return autopilot::パネル出力対象名(index);
+}
+
+ATS_API int WINAPI GetPanelOutputValue(int index) {
+    if (main != nullptr) {
+        return autopilot::パネル出力対象値(*main, index);
+    }
+    return 0;
+}
+
+// ホスト（MetroAtsBridge）から BVE 物理 panel/sound 書き込みの可否を設定する（既定は有効）。
+ATS_API void WINAPI SetPanelSoundWriteEnabled(int panelEnabled, int soundEnabled) {
+    if (main != nullptr) {
+        main->SetOutputWriteEnabled(panelEnabled != 0, soundEnabled != 0);
+    }
+}
+
+// ホスト（MetroAtsBridge）との内部通信：autopilot の全論理音声出力（atostart/inchingstart）を番号で直接参照する。
+ATS_API int WINAPI GetSoundOutputCount() {
+    if (main != nullptr) {
+        return main->音声出力数();
+    }
+    return 0;
+}
+
+ATS_API const wchar_t * WINAPI GetSoundOutputName(int index) {
+    if (main != nullptr) {
+        return main->音声出力名(index);
+    }
+    return L"";
+}
+
+ATS_API int WINAPI GetSoundOutputValue(int index) {
+    if (main != nullptr) {
+        return main->音声出力値(index);
+    }
+    return ATS_SOUND_CONTINUE;
+}
+
+// ホスト（MetroAtsBridge）から、信号 index ごとの ATO 目標速度（km/h）を直接設定する。
+ATS_API void WINAPI ATO_setBlockTargetSpeed(int index, int kmh) {
+    if (main != nullptr) {
+        main->setATCBlockTargetSpeed(index, kmh);
+    }
 }
 
 ATS_API void WINAPI SetPower(int notch) {

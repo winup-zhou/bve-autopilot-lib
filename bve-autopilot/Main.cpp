@@ -101,6 +101,9 @@ namespace autopilot
         _通過済地上子{},
         _音声状態{}
     {
+        for (int &x : _音声最終出力) {
+            x = -1;
+        }
         _tasc.目標停止位置を監視([&](区間 位置のある範囲) {
             _ato.tasc目標停止位置変化(位置のある範囲);
         });
@@ -205,6 +208,10 @@ namespace autopilot
         _状態.目安減速度設定(std::fabs(decel));
     }
 
+    void Main::setATCBlockTargetSpeed(int index, int kmh) {
+        _ato.信号速度を直接設定(index, static_cast<kmph>(kmh));
+    }
+
     ATS_HANDLES Main::経過(
         const ATS_VEHICLESTATE &状態, int *出力値, int *音声状態)
     {
@@ -264,18 +271,24 @@ namespace autopilot
 
         _状態.出力(ハンドル位置, 自動ノッチ);
 
-        for (auto &パネル出力 : _状態.設定().パネル出力対象登録簿()) {
-            出力値[パネル出力.first] = パネル出力.second.出力(*this);
+        if (_出力書込パネル) {
+            for (auto &パネル出力 : _状態.設定().パネル出力対象登録簿()) {
+                出力値[パネル出力.first] = パネル出力.second.出力(*this);
+            }
         }
 
         // 複数の音声が同じ音声出力先を共有している場合に互いに上書きしないように
-        // ATS_SOUND_CONTINUE でないものだけ後で書き換える
-        for (const auto &i : _状態.設定().音声割り当て()) {
-            音声状態[i.second] = ATS_SOUND_CONTINUE;
+        // ATS_SOUND_CONTINUE でないものだけ後で書き換える。
+        // 論理出力（_音声最終出力）は物理書き込みの可否に関わらず毎フレーム記録する（状態公開用）。
+        if (_出力書込音声) {
+            for (const auto &i : _状態.設定().音声割り当て()) {
+                音声状態[i.second] = ATS_SOUND_CONTINUE;
+            }
         }
         for (const auto &i : _状態.設定().音声割り当て()) {
             auto 出力 = _音声状態[i.first].出力();
-            if (出力 != ATS_SOUND_CONTINUE) {
+            _音声最終出力[static_cast<int>(i.first)] = 出力;
+            if (_出力書込音声 && 出力 != ATS_SOUND_CONTINUE) {
                 音声状態[i.second] = 出力;
             }
         }
@@ -292,6 +305,20 @@ namespace autopilot
         }
         _通過済地上子.clear();
         _通過済地上子.shrink_to_fit();
+    }
+
+    const wchar_t *Main::音声出力名(int 索引) const noexcept
+    {
+        static const wchar_t *名簿[] = { L"atostart", L"inchingstart" };
+        return (0 <= 索引 && 索引 < 2) ? 名簿[索引] : L"";
+    }
+
+    int Main::音声出力値(int 索引) const noexcept
+    {
+        if (索引 < 0 || 2 <= 索引) {
+            return ATS_SOUND_CONTINUE;
+        }
+        return _音声最終出力[索引] < 0 ? ATS_SOUND_CONTINUE : _音声最終出力[索引];
     }
 
 }

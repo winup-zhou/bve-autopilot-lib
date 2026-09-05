@@ -21,7 +21,7 @@
 #include "パネル出力.h"
 #include <algorithm>
 #include <cmath>
-#include <unordered_map>
+#include <map>
 #include "Main.h"
 #include "共通状態.h"
 #include "物理量.h"
@@ -64,7 +64,9 @@ namespace autopilot
             return v % 10;
         }
 
-        const std::unordered_map<std::wstring, パネル出力対象> 対象名簿 = {
+        // 論理名→出力対象。std::map により辞書順で安定した列挙順が保証され、
+        // ホスト側（MetroAtsBridge）がインデックスで全論理出力を直接参照できる。
+        const std::map<std::wstring, パネル出力対象> 対象名簿 = {
             {L"brake", パネル出力対象([](const Main & main) {
                 return main.状態().前回制動指令().value;
             })},
@@ -245,6 +247,41 @@ namespace autopilot
             return 無対象;
         }
         return i->second;
+    }
+
+    int パネル出力対象数() noexcept
+    {
+        return static_cast<int>(対象名簿.size());
+    }
+
+    const wchar_t *パネル出力対象名(int 索引) noexcept
+    {
+        if (索引 < 0) {
+            return L"";
+        }
+        auto it = 対象名簿.begin();
+        for (int i = 0; i < 索引; ++i) {
+            if (it == 対象名簿.end()) {
+                return L"";
+            }
+            ++it;
+        }
+        return (it == 対象名簿.end()) ? L"" : it->first.c_str();
+    }
+
+    int パネル出力対象値(const Main &main, int 索引)
+    {
+        if (索引 < 0) {
+            return 0;
+        }
+        auto it = 対象名簿.begin();
+        for (int i = 0; i < 索引; ++i) {
+            if (it == 対象名簿.end()) {
+                return 0;
+            }
+            ++it;
+        }
+        return (it == 対象名簿.end()) ? 0 : it->second.出力(main);
     }
 
 }

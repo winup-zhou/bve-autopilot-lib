@@ -72,16 +72,31 @@ namespace MetroAtsBridge
                 }
             }
 
+            // 枚举 autopilot（C++）的全部面板/声音逻辑输出名（内部通道，不经物理数组）
+            if (isAutopilotPluginLoaded) Config.RegisterAutopilotOutputs();
+
+            // 是否仍写入 BVE 物理 panel/sound（显示端子由 C++ 写入 buffer、bridge 整块转发，
+            // 开关经 SetPanelSoundWriteEnabled 下发；默认 true 保持原输出）
+            if (isAutopilotPluginLoaded) {
+                if (is64Bit) Sync64.SetPanelSoundWriteEnabled(Config.PanelWriteEnabled ? 1 : 0, Config.SoundWriteEnabled ? 1 : 0);
+                else Sync.SetPanelSoundWriteEnabled(Config.PanelWriteEnabled ? 1 : 0, Config.SoundWriteEnabled ? 1 : 0);
+            }
+
         }
 
         private void OnAllPluginsLoaded(object sender, EventArgs e) {
             // MetroAts 核心为必需依赖：未加载则无法运行，直接报错（不再支持独立模式）
             corePlugin = Plugins.VehiclePlugins["MetroAtsCore"] as CorePlugin
                 ?? throw new BveFileLoadException("未找到 MetroAts 核心插件 (MetroAtsCore)。MetroAtsBridge 需要 MetroAts 核心插件。", "MetroAtsBridge");
+
+            // 平行状态暴露：注册到核心，供其它插件经 TryGetPluginState("MetroAtsBridge") 读取 autopilot 输出
+            corePlugin.RegisterPluginStateProvider(this);
         }
 
         public override void Dispose() {
             Config.Dispose();
+
+            if (corePlugin != null) corePlugin.UnregisterPluginStateProvider(this);
 
             if (isAutopilotPluginLoaded) {
                 if (is64Bit) Sync64.Dispose();

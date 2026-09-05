@@ -52,9 +52,11 @@ namespace MetroAtsBridge {
                         if (is64Bit) {
                             Sync64.setATOTASCStatus(2);
                             Sync64.ATO_setATCLimit(nextSection.Location - state.Location, nextSection.CurrentSignalIndex);
+                            ApplyAtoBlockTargets(pointer, nextSection);
                         } else {
                             Sync.setATOTASCStatus(2);
                             Sync.ATO_setATCLimit(nextSection.Location - state.Location, nextSection.CurrentSignalIndex);
+                            ApplyAtoBlockTargets(pointer, nextSection);
                         }
                     }
                 } else {
@@ -128,12 +130,63 @@ namespace MetroAtsBridge {
                         panel[i] = panel_[i];
                         sound[i] = sound_[i];
                     }
+
+                    // 落地 autopilot（C++）逻辑输出：内部通道取逻辑值 → 按映射写 BVE 物理数组（受开关/重映射），
+                    // 同时记录平行状态供其它插件经核心读取。C++ 不直写 BVE，落地统一在此。
+                    UpdateOutputStates(panel, sound);
                 }
 
             } finally {
                 // Ensure the handles are freed to avoid memory leaks
                 if (panelHandle.IsAllocated) panelHandle.Free();
                 if (soundHandle.IsAllocated) soundHandle.Free();
+            }
+        }
+
+        /// <summary>
+        /// 取 autopilot（C++）本帧全部面板/声音逻辑输出（内部通道），
+        /// 经 PanelMap/SoundMap 按端子映射写入 BVE 物理数组（WritePanel/WriteSound：
+        /// 受 writepanel/writesound 开关与 [output] 重映射控制，越界/未注册端子仅记录状态），
+        /// 状态即 Config.PanelMap.State / SoundMap.State（平行暴露）。
+        /// </summary>
+        private void ApplyAtoBlockTargets(int pointer, Section nextSection) {
+            // ATO 多模式目标速度：把当前闭塞与次闭塞按模式（0遅速/1平常/2回復）的目标速度下发 C++（index 级）
+            int mode = corePlugin.ATORunningModeValue;
+
+            int curIdx = -1;
+            if (pointer > 0) {
+                var cur = sectionManager.Sections[pointer - 1] as Section;
+                if (cur != null) curIdx = cur.CurrentSignalIndex;
+            }
+            int nextIdx = nextSection.CurrentSignalIndex;
+
+            if (curIdx >= 0) {
+                int v = Config.AtoModeTargetSpeed(curIdx, mode);
+                if (is64Bit) Sync64.ATO_setBlockTargetSpeed(curIdx, v);
+                else Sync.ATO_setBlockTargetSpeed(curIdx, v);
+            }
+            int nv = Config.AtoModeTargetSpeed(nextIdx, mode);
+            if (is64Bit) Sync64.ATO_setBlockTargetSpeed(nextIdx, nv);
+            else Sync.ATO_setBlockTargetSpeed(nextIdx, nv);
+        }
+
+        /// <summary>
+        /// 取 autopilot（C++）本帧全部面板/声音逻辑输出（内部通道），
+        /// 经 PanelMap/SoundMap 按端子映射写入 BVE 物理数组（WritePanel/WriteSound：
+        /// 受 writepanel/writesound 开关与 [output] 重映射控制，越界/未注册端子仅记录状态），
+        /// 状态即 Config.PanelMap.State / SoundMap.State（平行暴露）。
+        /// </summary>
+        private void UpdateOutputStates(IList<int> panel, IList<int> sound) {
+            var panelNames = Config.PanelOutputNames;
+            for (int i = 0; i < panelNames.Count; i++) {
+                int v = is64Bit ? Sync64.GetPanelOutputValue(i) : Sync.GetPanelOutputValue(i);
+                Config.PanelMap.WritePanel(panel, panelNames[i], v);
+            }
+
+            var soundNames = Config.SoundOutputNames;
+            for (int i = 0; i < soundNames.Count; i++) {
+                int v = is64Bit ? Sync64.GetSoundOutputValue(i) : Sync.GetSoundOutputValue(i);
+                Config.SoundMap.WriteSound(sound, soundNames[i], v);
             }
         }
     }
