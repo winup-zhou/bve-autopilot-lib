@@ -29,10 +29,6 @@ namespace MetroAtsBridge
     public partial class MetroAtsBridge : AssemblyPluginBase {
         private readonly INative Native;
         private static VehicleSpec vehicleSpec;
-        private static bool isSpacePressed = false;
-        private static bool StandAloneMode = false;
-        private static bool Keyin = false;
-        private static bool TASCenable = false;
         private static CorePlugin corePlugin;
         private static bool isAutopilotPluginLoaded = false;
         public static SectionManager sectionManager;
@@ -54,8 +50,6 @@ namespace MetroAtsBridge
             Native.SignalUpdated += SetSignal;
             Plugins.AllPluginsLoaded += OnAllPluginsLoaded;
 
-            BveHacker.MainFormSource.KeyDown += OnKeyDown;
-            BveHacker.MainFormSource.KeyUp += OnKeyUp;
             BveHacker.ScenarioCreated += OnScenarioCreated;
 
             if (is64Bit) {
@@ -81,12 +75,9 @@ namespace MetroAtsBridge
         }
 
         private void OnAllPluginsLoaded(object sender, EventArgs e) {
-            try {
-                corePlugin = Plugins.VehiclePlugins["MetroAtsCore"] as CorePlugin;
-                StandAloneMode = false;
-            } catch (Exception ex) {
-                StandAloneMode = true;
-            }
+            // MetroAts 核心为必需依赖：未加载则无法运行，直接报错（不再支持独立模式）
+            corePlugin = Plugins.VehiclePlugins["MetroAtsCore"] as CorePlugin
+                ?? throw new BveFileLoadException("未找到 MetroAts 核心插件 (MetroAtsCore)。MetroAtsBridge 需要 MetroAts 核心插件。", "MetroAtsBridge");
         }
 
         public override void Dispose() {
@@ -97,8 +88,6 @@ namespace MetroAtsBridge
                 else Sync.Dispose();
             }
             isAutopilotPluginLoaded = false; 
-            
-            TASCenable = false;
 
             Native.Started -= Initialize;
             Native.DoorClosed -= DoorClosed;
@@ -110,9 +99,6 @@ namespace MetroAtsBridge
             Native.SignalUpdated -= SetSignal;
             Plugins.AllPluginsLoaded -= OnAllPluginsLoaded;
             BveHacker.ScenarioCreated -= OnScenarioCreated;
-
-            BveHacker.MainFormSource.KeyDown -= OnKeyDown;
-            BveHacker.MainFormSource.KeyUp -= OnKeyUp;
         }
     }
 }

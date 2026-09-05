@@ -6,7 +6,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System;
 using System.Linq;
-using System.Windows.Forms;
 
 namespace MetroAtsBridge {
     public static class Config {
@@ -20,16 +19,11 @@ namespace MetroAtsBridge {
 
         public static List<KeyPosList> ATO_KeyPosLists = new List<KeyPosList>();
         public static List<KeyPosList> TASC_KeyPosLists = new List<KeyPosList>();
-        public static KeyPosList StandAloneKey = KeyPosList.None;
-        public static Keys StandAloneTASCKey = Keys.None;
 
         public static void Load() {
             path = new FileInfo(Path.Combine(PluginDir, "MetroAtsBridgeConfig.ini")).FullName;
             if (File.Exists(path)) {
                 try {
-                    ReadConfig("standalonemode", "keyposition", ref StandAloneKey);
-                    ReadConfig("standalonemode", "tasckey", ref StandAloneTASCKey);
-
                     var KeysString1 = "";
                     ReadConfig("keys", "atopositions", ref KeysString1);
                     foreach (var i in KeysString1.Split(',')) {
@@ -91,28 +85,6 @@ namespace MetroAtsBridge {
             var Readsize = GetPrivateProfileString(Section, Key, "", RetVal, buffer_size, path);
             if (Readsize > 0 && Readsize < buffer_size - 1) {
                 Value = RetVal.ToString();
-            } else {
-                Value = OriginalVal;
-            }
-        }
-
-        private static void ReadConfig(string Section, string Key, ref Keys Value) {
-            var OriginalVal = Value;
-            var RetVal = new StringBuilder(buffer_size);
-            var Readsize = GetPrivateProfileString(Section, Key, "", RetVal, buffer_size, path);
-            if (Readsize > 0 && Readsize < buffer_size - 1) {
-                Value = (Keys)Enum.Parse(typeof(Keys), RetVal.ToString(), false);
-            } else {
-                Value = OriginalVal;
-            }
-        }
-
-        private static void ReadConfig(string Section, string Key, ref KeyPosList Value) {
-            var OriginalVal = Value;
-            var RetVal = new StringBuilder(buffer_size);
-            var Readsize = GetPrivateProfileString(Section, Key, "", RetVal, buffer_size, path);
-            if (Readsize > 0 && Readsize < buffer_size - 1) {
-                Value = (KeyPosList)Enum.Parse(typeof(KeyPosList), RetVal.ToString(), true);
             } else {
                 Value = OriginalVal;
             }

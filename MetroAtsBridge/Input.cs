@@ -10,8 +10,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Diagnostics.Eventing.Reader;
 
 namespace MetroAtsBridge
 {
@@ -38,17 +36,6 @@ namespace MetroAtsBridge
             }
         }
 
-        private void OnKeyUp(object sender, KeyEventArgs e) {
-
-        }
-
-        private void OnKeyDown(object sender, KeyEventArgs e) {
-            var handles = BveHacker.Scenario.Vehicle.Instruments.AtsPlugin.Handles;
-            if (StandAloneMode && e.KeyCode == Config.StandAloneTASCKey && handles.BrakeNotch >= vehicleSpec.BrakeNotches && Keyin) {
-                TASCenable = !TASCenable;
-            }
-        }
-
         private void KeyUp(object sender, AtsKeyEventArgs e) {
             if (isAutopilotPluginLoaded) {
                 if (is64Bit) Sync64.KeyUp((int)e.KeyName);
@@ -57,15 +44,7 @@ namespace MetroAtsBridge
         }
 
         private void KeyDown(object sender, AtsKeyEventArgs e) {
-            var handles = BveHacker.Scenario.Vehicle.Instruments.AtsPlugin.Handles;
-            if (handles.BrakeNotch == vehicleSpec.BrakeNotches + 1) {
-                if (StandAloneMode && e.KeyName == AtsKeyName.I && handles.ReverserPosition == ReverserPosition.N) {
-                    Keyin = false;
-                } else if (StandAloneMode && e.KeyName == AtsKeyName.J && handles.ReverserPosition == ReverserPosition.N) {
-                    Keyin = true;
-                }
-            }
-
+            // 钥匙/档位/ATO-TASC 切换均由 MetroAts 核心处理（不再支持独立模式的 I/J 本地控制）
             if (isAutopilotPluginLoaded) {
                 if (is64Bit) Sync64.KeyDown((int)e.KeyName);
                 else Sync.KeyDown((int)e.KeyName);

@@ -101,6 +101,7 @@ namespace autopilot
         自動制御指令 _出力ノッチ;
         急動作抑制 _急動作抑制;
         bool _リセット直後 = true;
+        時刻 _発進時刻 = {};
 
         void レバー操作(const 共通状態 &状態) noexcept;
     };

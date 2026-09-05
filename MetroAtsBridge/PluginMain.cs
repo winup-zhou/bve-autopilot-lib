@@ -43,68 +43,38 @@ namespace MetroAtsBridge {
 
             var nextSection = sectionManager.Sections[pointer] as Section;
 
-            if (!StandAloneMode) {
-                if (corePlugin.isATO_TASCenabled && corePlugin.KeyPos != MetroAts.KeyPosList.None) {
-                    if (Config.ATO_KeyPosLists.Contains((KeyPosList)corePlugin.KeyPos) && panel[263] == 1 && panel[274] == 0) {
-                        if (isAutopilotPluginLoaded) {
-                            if (is64Bit) {
-                                Sync64.setATOTASCStatus(2);
-                                Sync64.ATO_setATCLimit(nextSection.Location - state.Location, nextSection.CurrentSignalIndex);
-                            } else {
-                                Sync.setATOTASCStatus(2);
-                                Sync.ATO_setATCLimit(nextSection.Location - state.Location, nextSection.CurrentSignalIndex);
-                            }
-                        }
-                    } else {
-                        if (Config.TASC_KeyPosLists.Contains((KeyPosList)corePlugin.KeyPos)) {
-                            if (isAutopilotPluginLoaded) {
-                                if (is64Bit) Sync64.setATOTASCStatus(1);
-                                else Sync.setATOTASCStatus(1);
-                            }
-
+            // 核心必需：ATO/TASC 状态完全由 MetroAts 核心 + ATC 子插件决定（不再支持独立模式）
+            if (corePlugin.isATO_TASCenabled && corePlugin.KeyPos != MetroAts.KeyPosList.None) {
+                // ATO 可用性由 ATC 插件（MetroSignal/TokyuSignal）经核心 IsATOAvailable 上报，
+                // 替代此前读取 ATC 面板灯端子(panel[263]/[274])的耦合方式。
+                if (Config.ATO_KeyPosLists.Contains((KeyPosList)corePlugin.KeyPos) && corePlugin.IsATOAvailable) {
+                    if (isAutopilotPluginLoaded) {
+                        if (is64Bit) {
+                            Sync64.setATOTASCStatus(2);
+                            Sync64.ATO_setATCLimit(nextSection.Location - state.Location, nextSection.CurrentSignalIndex);
                         } else {
-                            if (isAutopilotPluginLoaded) {
-                                if (is64Bit) Sync64.setATOTASCStatus(0);
-                                else Sync.setATOTASCStatus(0);
-                            }
+                            Sync.setATOTASCStatus(2);
+                            Sync.ATO_setATCLimit(nextSection.Location - state.Location, nextSection.CurrentSignalIndex);
                         }
                     }
                 } else {
-                    if (isAutopilotPluginLoaded) {
-                        if (is64Bit) Sync64.setATOTASCStatus(0);
-                        else Sync.setATOTASCStatus(0);
+                    if (Config.TASC_KeyPosLists.Contains((KeyPosList)corePlugin.KeyPos)) {
+                        if (isAutopilotPluginLoaded) {
+                            if (is64Bit) Sync64.setATOTASCStatus(1);
+                            else Sync.setATOTASCStatus(1);
+                        }
+
+                    } else {
+                        if (isAutopilotPluginLoaded) {
+                            if (is64Bit) Sync64.setATOTASCStatus(0);
+                            else Sync.setATOTASCStatus(0);
+                        }
                     }
                 }
             } else {
-                if (TASCenable && Keyin) {
-                    if (Config.ATO_KeyPosLists.Contains(Config.StandAloneKey) && panel[263] == 1 && panel[274] == 0) {
-                        if (isAutopilotPluginLoaded) {
-                            if (is64Bit) {
-                                Sync64.setATOTASCStatus(2);
-                                Sync64.ATO_setATCLimit(nextSection.Location - state.Location, nextSection.CurrentSignalIndex);
-                            } else {
-                                Sync.setATOTASCStatus(2);
-                                Sync.ATO_setATCLimit(nextSection.Location - state.Location, nextSection.CurrentSignalIndex);
-                            }
-                        }
-                    } else {
-                        if (Config.TASC_KeyPosLists.Contains(Config.StandAloneKey)) {
-                            if (isAutopilotPluginLoaded) {
-                                if (is64Bit) Sync64.setATOTASCStatus(1);
-                                else Sync.setATOTASCStatus(1);
-                            }
-                        } else {
-                            if (isAutopilotPluginLoaded) {
-                                if (is64Bit) Sync64.setATOTASCStatus(0);
-                                else Sync.setATOTASCStatus(0);
-                            }
-                        }
-                    }
-                } else {
-                    if (isAutopilotPluginLoaded) {
-                        if (is64Bit) Sync64.setATOTASCStatus(0);
-                        else Sync.setATOTASCStatus(0);
-                    }
+                if (isAutopilotPluginLoaded) {
+                    if (is64Bit) Sync64.setATOTASCStatus(0);
+                    else Sync.setATOTASCStatus(0);
                 }
             }
             int[] panel_ = new int[1024];
