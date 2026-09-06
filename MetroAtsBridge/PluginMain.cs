@@ -13,6 +13,9 @@ using System.Threading.Tasks;
 namespace MetroAtsBridge {
     public partial class MetroAtsBridge : AssemblyPluginBase {
 
+        // ATO 模式目标全量预置缓存（模式/现闭塞/次闭塞变化时触发一次全量下发）
+        private static int lastAtoModeApply = -1, lastAtoCurApply = -1, lastAtoNextApply = -1;
+
         public override void Tick(TimeSpan elapsed) {
             var state = Native.VehicleState;
             var panel = Native.AtsPanelArray;
@@ -159,6 +162,23 @@ namespace MetroAtsBridge {
                 if (cur != null) curIdx = cur.CurrentSignalIndex;
             }
             int nextIdx = nextSection.CurrentSignalIndex;
+
+            // 模式或现闭塞/次闭塞变化时，把全部可能出现的目标现示（11..33 与 ORP35）一次性全量预置，
+            // 避免新 index 首次出现或被 1011 等刷新后，以线路真实限速（满速）追走。
+            if (mode != lastAtoModeApply || curIdx != lastAtoCurApply || nextIdx != lastAtoNextApply) {
+                for (int i = 11; i <= 33; i++) {
+                    int v = Config.AtoModeTargetSpeed(i, mode);
+                    if (is64Bit) Sync64.ATO_setBlockTargetSpeed(i, v);
+                    else Sync.ATO_setBlockTargetSpeed(i, v);
+                }
+                int ov = Config.AtoModeTargetSpeed(35, mode);
+                if (is64Bit) Sync64.ATO_setBlockTargetSpeed(35, ov);
+                else Sync.ATO_setBlockTargetSpeed(35, ov);
+
+                lastAtoModeApply = mode;
+                lastAtoCurApply = curIdx;
+                lastAtoNextApply = nextIdx;
+            }
 
             if (curIdx >= 0) {
                 int v = Config.AtoModeTargetSpeed(curIdx, mode);

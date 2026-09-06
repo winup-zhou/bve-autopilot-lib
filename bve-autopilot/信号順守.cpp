@@ -453,6 +453,22 @@ namespace autopilot
 
     void 信号順守::経過(const 共通状態 &状態)
     {
+        // ATO 目標速度の上書きを復元する。1011「信号速度設定」地上子・リセット等で
+        // _信号速度表 が線路の実値に上書きされても、モード別目標速度（MetroAtsBridge から
+        // ATO_setBlockTargetSpeed で設定）を毎フレーム張り直して満速追走を防ぐ。
+        bool 上書き復元 = false;
+        for (const auto &kv : _ato速度上書き) {
+            auto it = _信号速度表.find(kv.first);
+            if (it == _信号速度表.end() || it->second != kv.second) {
+                _信号速度表[kv.first] = kv.second;
+                上書き復元 = true;
+            }
+        }
+        if (上書き復元) {
+            信号速度更新();
+            信号グラフ再計算();
+        }
+
         bool グラフ更新 = false;
 
         // 通過済みの閉塞を現在閉塞に統合して消す
@@ -560,6 +576,7 @@ namespace autopilot
             return; // 同じ値なら何もしない（毎フレーム呼ばれても無駄な再計算を避ける）
         }
         _信号速度表[指示] = 速度;
+        _ato速度上書き[指示] = 速度;
         // 現在・前方閉塞の信号速度を新しい目標速度で即時更新し、信号グラフを再計算する
         信号速度更新();
         信号グラフ再計算();
